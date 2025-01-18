@@ -1,0 +1,223 @@
+
+sample_size: 0.25 # 0.1 = 10% of the population
+n_closest_cells: 10 # Number of cell candidates to consider for main activity location
+default_slack_factor: 1.5
+sigmoid_beta: -0.15
+sigmoid_delta_t: 1200  # Seconds
+
+input_files:
+  expanded_households_files: # synthetic_households from PopSim
+    - "data/synthetic_households_city.csv"
+    - "data/synthetic_households_region.csv"
+
+  enhanced_mid_folder: "data/mid/enhanced"
+
+  mid_hh_folder: "data/mid/households"
+  mid_persons_folder: "data/mid/persons"
+  mid_trips_folder: "data/mid/trips"
+
+  buildings_in_lowest_geography_with_weights_file: "data/houses_with_weights.csv"
+
+  capa_cells_csv_path: "data/region_hanover_potentials.csv"
+  capa_cells_shp_path: "data/shapes/RH_useful__zone.SHP"
+
+  region_without_city_gpkg_file: "data/shapes/RegionOhneStadtGitter100m.gpkg"
+
+  shape_boundary_file: "data/shapes/region_hanover.shp"
+
+  slack_factors_file: "data/Slack_Factors.csv"
+
+# Leave empty to write no file, else e.g.: "full_population_frame.csv"
+output_files:
+  population_analysis_output_file: "full_population_frame.csv"
+  matsim_plans_file: "population.xml"
+  stats_file: "stats.txt"
+  enhanced_mid_file: "enhanced_mid.csv"
+
+id_columns:
+  household_mid_id_column: "H_ID"
+  household_popsim_id_column: "household_id"
+  person_id_column: "HP_ID"
+  # In MiD, the leg id is not unique. Provide leg_non_unique_id_column, a unique id will be created.
+  # If your data already has unique leg ids, feel free to provide leg_id_column,
+  # but a sortable leg_non_unique_id_column must be provided anyway.
+  leg_non_unique_id_column: "W_ID"  # Expected to be sortable in the order of the trip legs
+  leg_id_column: "HPW_ID" # Will be created if it doesn't exist and leg_non_unique_id_column is provided
+  tt_matrix_cell_id_column: "cell_id"
+
+# Declare only columns that are needed for processing (you can declare more, but that's a waste of memory and time)
+geography_columns:  # largest to smallest, as in the popsim settings
+  - WELT
+  - STAAT
+  - STADTTLNR
+  - BAUBLOCKNR
+lowest_level_geography: "BAUBLOCKNR"
+
+hh_columns:
+  car_in_hh_column: "auto"  # "auto" is a boolean column, 1 = yes, 0 = no
+  number_of_cars_column: "H_ANZAUTO"
+  region_type_column: "RegioStaR7"
+
+person_columns:
+  person_age: "HP_ALTER"
+  car_avail: "P_VAUTO"
+  has_license: "P_FS_PKW"
+  number_of_legs: "anzwege1" # Legs without rbW
+
+leg_columns:
+  leg_target_activity: "W_ZWECK"
+  leg_main_mode: "hvm_imp"
+  leg_start_time: "W_SZ"
+  leg_end_time: "W_AZ"
+  leg_duration_minutes: "wegmin_imp1"  # Leg durations imputed, with rbW
+  leg_distance_km: "wegkm_imp"
+  first_leg_starts_at_home: "W_SO1"
+  leg_is_rbw: "W_RBW"
+
+enhancement_columns: # Columns created by the enhancement module
+  random_location: "random_location"
+  activity_duration_seconds: "activity_duration_seconds"
+  number_of_legs_incl_imputed: "number_of_legs_incl_imputed"
+  imputed_time: "imputed_time"
+  imputed_leg: "imputed_leg"
+  list_of_cars: "car_list"
+  leg_from_activity: "leg_from_activity"
+
+processing_columns: # Used by several pipelines. Cols aren't in the outputs, but are in the final analysis dump.
+  unique_leg_id: "unique_leg_id"
+  unique_household_id: "unique_household_id"
+  unique_person_id: "unique_person_id"
+
+main_activities: # These activities are considered main activities. They must be present in the value map.
+  - work
+  - education
+
+value_maps: # Maps values from the input data to internal values.
+  activities:
+    work:
+      mid: 1
+      input_locations:
+      internal: work
+      MATSim: work
+    business:
+      mid: 2
+      input_locations:
+      internal: business
+      MATSim: work
+    education:
+      mid: 3
+      input_locations:
+      internal: education
+      MATSim: education
+    shopping:
+      mid: 4
+      input_locations:
+      internal: shopping
+      MATSim: shopping
+    errands:
+      mid: 5
+      input_locations:
+      internal: errands
+      MATSim: leisure
+    pick_up_drop_off:
+      mid: 6
+      input_locations:
+      internal: pick_up_drop_off
+      MATSim: other
+    leisure:
+      mid: 7
+      input_locations:
+      internal: leisure
+      MATSim: leisure
+    home:
+      mid: 8
+      input_locations:
+      internal: home
+      MATSim: home
+    return_journey:
+      mid: 9
+      input_locations:
+      internal: return_journey
+      MATSim: other
+    other:
+      mid: 10
+      input_locations:
+      internal: other
+      MATSim: other
+    early_education:
+      mid: 11
+      input_locations:
+      internal: early_education
+      MATSim: education
+    daycare:
+      mid: 12
+      input_locations:
+      internal: daycare
+      MATSim: education
+    accompany_adult:
+      mid: 13
+      input_locations:
+      internal: accompany_adult
+      MATSim: other
+    sports:
+      mid: 14
+      input_locations:
+      internal: sports
+      MATSim: leisure
+    meetup:
+      mid: 15
+      input_locations:
+      internal: meetup
+      MATSim: leisure
+    lessons:
+      mid: 16
+      input_locations:
+      internal: lessons
+      MATSim: leisure
+    unspecified:
+      mid: 99
+      input_locations:
+      internal: unspecified
+      MATSim: other
+  modes:
+    car:
+      mid: 4
+      internal: car
+      MATSim: car
+    bike:
+      mid: 2
+      internal: bike
+      MATSim: bike
+    walk:
+      mid: 1
+      internal: walk
+      MATSim: walk
+    pt:
+      mid: 5
+      internal: pt
+      MATSim: pt
+    ride:
+      mid: 3
+      internal: ride
+      MATSim: ride
+    undefined:
+      mid: undefined
+      internal: undefined
+      MATSim: undefined
+
+  car_availability:
+    never: 3
+  car_in_hh:
+    "yes": 1
+    "no": 0
+  license:
+    "yes": 1
+    "no": 2
+    unknown: 9
+    adult_over_16_proxy: 206
+    person_under_16: 403
+  misc:
+    first_leg_starts_at_home: 1
+
+misc:
+  dun_dun_duuun: 0 # Play sound on error
