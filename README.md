@@ -56,9 +56,4 @@ These inputs allow CARLA to match individuals' trips to suitable activity locati
 The script generates the following files:
 - **`location_assignment_result_carla.csv`**: Contains the assigned locations for each activity.
 - **`location_assignment_stats.txt`**: Includes performance metrics and runtime statistics.
-
-## Notes
-
-CARLA is designed to be flexible and robust, but the configuration allows you to adapt it to your specific use case. For detailed explanations of how each configuration affects the results, refer to the comments in the code or the accompanying paper.
-
 ---
