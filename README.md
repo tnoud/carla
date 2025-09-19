@@ -1,5 +1,9 @@
 # CARLA: Location-Assignment Algorithm
 
+⚠️ 
+CARLA has been fully re-implemented as part of the chainsolvers library, which is more modular, efficient, and easy-to-use.
+Please use that library for any new projects: https://github.com/TUBS-IVS/chainsolvers
+
 ## Overview
 
 CARLA (Constrained Anchor-based Recursive Location Assignment) is an algorithm for assigning activity locations in activity-based transport models. It balances **location potential** and **distance accuracy**, while handling real-world challenges like sparse data or infeasible distances. The implementation works directly with the provided sample data, but the modular design allows for easy adjustments.
